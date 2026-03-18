@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nexus LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --a:#f97316;--a2:#fb923c;--a3:#fed7aa;
+  --bg1:#0c0a09;--bg2:#1c1917;--bg3:#292524;--bg4:#3d3937;
+  --t1:#fafaf9;--t2:#d6d3d1;--t3:#a8a29e;--t4:#57534e;
+  --border:#2d2926;--border2:#3d3937;
+  --sidebar:#0f0d0c;
+  --green:#22c55e;--blue:#3b82f6;--red:#ef4444;--amber:#f59e0b;--violet:#a855f7;
+  --card-bg:#161412;
+  --radius:12px;
+}
+[data-theme="light"]{
+  --bg1:#fafaf9;--bg2:#f5f4f2;--bg3:#eae8e5;--bg4:#d6d3d0;
+  --t1:#1c1917;--t2:#44403c;--t3:#78716c;--t4:#a8a29e;
+  --border:#e7e5e4;--border2:#d6d3d1;
+  --sidebar:#1c1917;
+  --card-bg:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg1);color:var(--t1);display:flex;height:100vh;overflow:hidden;font-size:14px;}
+
+/* SIDEBAR */
+#sidebar{
+  width:250px;min-width:250px;background:var(--sidebar);
+  display:flex;flex-direction:column;border-right:1px solid var(--border);
+  transition:width .25s cubic-bezier(.4,0,.2,1);overflow:hidden;position:relative;z-index:100;
+}
+#sidebar.collapsed{width:64px;min-width:64px;}
+#sidebar.collapsed .lbl,#sidebar.collapsed .sec-label,#sidebar.collapsed .logo-txt,#sidebar.collapsed .user-info{display:none!important;}
+#sidebar.collapsed .nav-item{justify-content:center;padding:10px;}
+#sidebar.collapsed .logo-wrap{justify-content:center;padding:20px 0;}
+#sidebar.collapsed .nav-section{padding:8px 8px;}
+.logo-wrap{display:flex;align-items:center;gap:10px;padding:20px 18px;border-bottom:1px solid var(--border);}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--a),#c2410c);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;font-weight:800;color:#fff;font-family:'Syne',sans-serif;}
+.logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--t1);white-space:nowrap;}
+.logo-txt span{color:var(--a);}
+.sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 0;}
+.sidebar-scroll::-webkit-scrollbar{width:3px;}
+.sidebar-scroll::-webkit-scrollbar-track{background:transparent;}
+.sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:9px;}
+.nav-section{padding:6px 12px;margin-top:8px;}
+.sec-label{font-size:10px;font-weight:600;letter-spacing:1.2px;color:var(--t4);text-transform:uppercase;padding:0 6px;margin-bottom:4px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 18px;
+  border-radius:8px;cursor:pointer;transition:all .15s ease;
+  color:var(--t3);font-size:13px;font-weight:500;white-space:nowrap;margin:1px 8px;
+}
+.nav-item:hover{background:var(--bg3);color:var(--t1);}
+.nav-item.active{background:rgba(249,115,22,.12);color:var(--a);border:1px solid rgba(249,115,22,.2);}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;stroke-width:1.8;}
+.nav-divider{height:1px;background:var(--border);margin:12px 18px;}
+.sidebar-footer{padding:14px;border-top:1px solid var(--border);}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;cursor:pointer;transition:background .15s;}
+.user-card:hover{background:var(--bg3);}
+.user-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--violet));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;}
+.user-info{overflow:hidden;}
+.user-name{font-weight:600;font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-role{font-size:11px;color:var(--t3);}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#topbar{
+  height:58px;min-height:58px;background:var(--bg1);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+}
+.topbar-btn{width:34px;height:34px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);transition:all .15s;}
+.topbar-btn:hover{background:var(--bg3);color:var(--t1);}
+.topbar-btn svg{width:16px;height:16px;}
+.topbar-search{flex:1;max-width:360px;position:relative;}
+.topbar-search input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:7px 12px 7px 36px;color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s;}
+.topbar-search input::placeholder{color:var(--t4);}
+.topbar-search input:focus{border-color:var(--a);}
+.topbar-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--t4);}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.notif-btn{position:relative;}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--a);border-radius:50%;border:2px solid var(--bg1);}
+.theme-toggle{display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;color:var(--t2);}
+
+#content{flex:1;overflow-y:auto;overflow-x:hidden;}
+#content::-webkit-scrollbar{width:5px;}
+#content::-webkit-scrollbar-track{background:transparent;}
+#content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:9px;}
+
+/* PAGES */
+.page{display:none;padding:24px;animation:fadeIn .2s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.ph-left{}
+.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--t1);letter-spacing:-.3px;}
+.page-sub{font-size:13px;color:var(--t3);margin-top:3px;}
+.ph-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+/* CARDS */
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.card-sm{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+.card-title{font-weight:700;font-size:14px;color:var(--t1);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px;}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:border-color .2s;}
+.stat-card:hover{border-color:var(--a);}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle,rgba(249,115,22,.08) 0%,transparent 70%);pointer-events:none;}
+.stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--t1);line-height:1;}
+.stat-lbl{font-size:12px;color:var(--t3);margin-top:4px;}
+.stat-change{font-size:11px;margin-top:8px;display:flex;align-items:center;gap:3px;}
+.stat-change.up{color:var(--green);}
+.stat-change.down{color:var(--red);}
+.stat-icon{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.stat-icon svg{width:18px;height:18px;}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.grid-65-35{display:grid;grid-template-columns:1.8fr 1fr;gap:16px;}
+.grid-35-65{display:grid;grid-template-columns:1fr 1.8fr;gap:16px;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,.12);color:#4ade80;}
+.badge-red{background:rgba(239,68,68,.12);color:#f87171;}
+.badge-amber{background:rgba(245,158,11,.12);color:#fbbf24;}
+.badge-blue{background:rgba(59,130,246,.12);color:#60a5fa;}
+.badge-violet{background:rgba(168,85,247,.12);color:#c084fc;}
+.badge-orange{background:rgba(249,115,22,.12);color:#fb923c;}
+.badge-gray{background:var(--bg3);color:var(--t3);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.btn svg{width:14px;height:14px;}
+.btn-primary{background:linear-gradient(135deg,var(--a),#c2410c);color:#fff;}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-secondary{background:var(--bg3);color:var(--t1);border:1px solid var(--border2);}
+.btn-secondary:hover{background:var(--bg4);}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--bg2);}
+.btn-danger{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+.btn-danger:hover{background:rgba(239,68,68,.2);}
+.btn-success{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2);}
+.btn-sm{padding:5px 10px;font-size:12px;}
+
+/* PROGRESS */
+.progress-track{height:6px;background:var(--bg3);border-radius:99px;overflow:hidden;}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--a),#fb923c);border-radius:99px;transition:width .4s ease;}
+.progress-bar.green{background:linear-gradient(90deg,#16a34a,#22c55e);}
+.progress-bar.blue{background:linear-gradient(90deg,#1d4ed8,#3b82f6);}
+.progress-bar.violet{background:linear-gradient(90deg,#7c3aed,#a855f7);}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--t4);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--t2);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.td-name{color:var(--t1);font-weight:500;}
+
+/* AVATAR */
+.av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;flex-shrink:0;}
+.av-sm{width:24px;height:24px;font-size:10px;}
+.av-lg{width:44px;height:44px;font-size:16px;}
+.av-orange{background:linear-gradient(135deg,#f97316,#c2410c);}
+.av-blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
+.av-violet{background:linear-gradient(135deg,#a855f7,#7c3aed);}
+.av-green{background:linear-gradient(135deg,#22c55e,#16a34a);}
+.av-red{background:linear-gradient(135deg,#ef4444,#dc2626);}
+.av-amber{background:linear-gradient(135deg,#f59e0b,#d97706);}
+
+/* CHART bars (CSS only) */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;}
+.bar{flex:1;background:linear-gradient(180deg,var(--a),rgba(249,115,22,.3));border-radius:5px 5px 0 0;position:relative;cursor:pointer;transition:opacity .15s;}
+.bar:hover{opacity:.8;}
+.bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--t4);white-space:nowrap;}
+.chart-wrap{padding-bottom:28px;}
+
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.donut{position:relative;width:100px;height:100px;flex-shrink:0;}
+.donut svg{transform:rotate(-90deg);}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.donut-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--t1);}
+.donut-sub{font-size:10px;color:var(--t3);}
+.donut-legend{display:flex;flex-direction:column;gap:6px;}
+.dl-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);}
+.dl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+
+/* ACTIVITY FEED */
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.activity-item:last-child{border-bottom:none;}
+.act-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.act-text{font-size:13px;color:var(--t2);line-height:1.5;}
+.act-text strong{color:var(--t1);}
+.act-time{font-size:11px;color:var(--t4);margin-top:2px;}
+
+/* KANBAN */
+.kanban-board{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;}
+.kanban-col{min-width:280px;flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+.kanban-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.kanban-title{font-weight:700;font-size:13px;color:var(--t1);display:flex;align-items:center;gap:6px;}
+.k-count{background:var(--bg3);color:var(--t3);font-size:11px;padding:1px 7px;border-radius:99px;}
+.kanban-card{background:var(--card-bg);border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:8px;cursor:grab;transition:border-color .15s;}
+.kanban-card:hover{border-color:var(--a);}
+.kc-title{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:6px;}
+.kc-desc{font-size:12px;color:var(--t3);margin-bottom:10px;line-height:1.4;}
+.kc-footer{display:flex;align-items:center;justify-content:space-between;}
+.kc-avatars{display:flex;}
+.kc-avatars .av-sm{margin-left:-6px;border:2px solid var(--card-bg);}
+.kc-avatars .av-sm:first-child{margin-left:0;}
+
+/* COURSE CARD */
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+.course-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s;}
+.course-card:hover{border-color:var(--a);transform:translateY(-2px);}
+.cc-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden;}
+.cc-body{padding:14px;}
+.cc-title{font-weight:700;font-size:14px;color:var(--t1);margin-bottom:4px;}
+.cc-meta{font-size:12px;color:var(--t3);margin-bottom:10px;}
+.cc-footer{display:flex;align-items:center;justify-content:space-between;}
+
+/* INTERNSHIP CARD */
+.intern-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+.intern-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:border-color .2s,transform .2s;}
+.intern-card:hover{border-color:var(--a);transform:translateY(-2px);}
+.ic-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.ic-logo{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid var(--border);flex-shrink:0;}
+.ic-info{flex:1;}
+.ic-title{font-weight:700;font-size:14px;color:var(--t1);}
+.ic-company{font-size:12px;color:var(--t3);margin-top:2px;}
+.ic-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.ic-tag{background:var(--bg3);color:var(--t3);font-size:11px;padding:2px 8px;border-radius:5px;}
+.ic-footer{display:flex;align-items:center;justify-content:space-between;}
+
+/* FORM */
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px;display:block;}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--t1);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--a);}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--t4);}
+.form-select option{background:var(--bg2);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--bg2);padding:4px;border-radius:9px;border:1px solid var(--border);width:fit-content;}
+.tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--t3);transition:all .15s;}
+.tab.active{background:var(--bg1);color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.3);}
+
+/* FORUM */
+.thread-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;border-radius:8px;padding:14px;}
+.thread-item:hover{background:var(--bg2);}
+.thread-item.active-thread{background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.15);border-radius:8px;}
+.ti-votes{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:40px;}
+.ti-vnum{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--t2);}
+.ti-vlbl{font-size:10px;color:var(--t4);}
+.ti-body{flex:1;}
+.ti-title{font-weight:600;font-size:14px;color:var(--t1);margin-bottom:4px;}
+.ti-meta{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+
+/* COMMENT */
+.comment-item{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);}
+.comment-item:last-child{border-bottom:none;}
+.comment-body{flex:1;}
+.comment-author{font-weight:600;font-size:13px;color:var(--t1);}
+.comment-time{font-size:11px;color:var(--t4);margin-left:8px;}
+.comment-text{font-size:13px;color:var(--t2);margin-top:4px;line-height:1.6;}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px);}
+#modal-overlay.open{display:flex;}
+#modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;min-width:380px;max-width:520px;width:90%;max-height:90vh;overflow-y:auto;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--t1);}
+.modal-close{width:30px;height:30px;border-radius:7px;background:var(--bg3);border:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;}
+
+/* SETTINGS */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.setting-info{}
+.setting-name{font-weight:600;font-size:13px;color:var(--t1);}
+.setting-desc{font-size:12px;color:var(--t3);margin-top:2px;}
+.toggle{width:40px;height:22px;border-radius:99px;background:var(--bg4);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--a);}
+.toggle::after{content:'';width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left .2s;}
+.toggle.on::after{left:21px;}
+
+/* DIARY */
+.diary-entry{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;position:relative;}
+.diary-entry::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--a);border-radius:3px 0 0 3px;}
+.de-date{font-size:11px;color:var(--t4);margin-bottom:4px;}
+.de-title{font-weight:700;font-size:14px;color:var(--t1);margin-bottom:4px;}
+.de-text{font-size:13px;color:var(--t2);line-height:1.6;}
+
+/* ANALYTICS CHART */
+.sparkline{display:flex;align-items:flex-end;gap:3px;height:50px;}
+.sp-bar{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--a),rgba(249,115,22,.2));}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .grid-2,.grid-3,.grid-65-35,.grid-35-65{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+}
+@media(max-width:700px){
+  #sidebar{position:fixed;height:100%;left:-260px;transition:left .25s ease;z-index:200;}
+  #sidebar.mobile-open{left:0;}
+  .mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;display:none;}
+  .mobile-overlay.show{display:block;}
+}
+
+/* MISC */
+.sep{height:1px;background:var(--border);margin:16px 0;}
+.text-mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
+.empty-state{text-align:center;padding:40px;color:var(--t3);}
+.empty-state svg{width:40px;height:40px;margin:0 auto 10px;display:block;color:var(--t4);}
+.pill-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{background:var(--bg3);color:var(--t3);font-size:11px;padding:3px 9px;border-radius:6px;}
+.highlight-box{background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.15);border-radius:10px;padding:14px;}
+.info-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:14px;}
+.kpi-mini{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.kpi-mini:last-child{border-bottom:none;}
+.item-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.item-row:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" id="mobile-overlay" onclick="closeMobile()"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="logo-wrap">
+    <div class="logo-icon">N</div>
+    <div class="logo-txt">Nex<span>us</span> LMS</div>
+  </div>
+  <div class="sidebar-scroll">
+    <div class="nav-section">
+      <div class="sec-label lbl">Dashboards</div>
+      <div class="nav-item active" onclick="nav('admin',this)" data-page="admin">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="lbl">Admin Overview</span>
+      </div>
+      <div class="nav-item" onclick="nav('intern',this)" data-page="intern">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
+        <span class="lbl">Intern Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="nav('faculty',this)" data-page="faculty">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        <span class="lbl">Faculty Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="nav('org',this)" data-page="org">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        <span class="lbl">Organization</span>
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="sec-label lbl">Modules</div>
+      <div class="nav-item" onclick="nav('internships',this)" data-page="internships">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <span class="lbl">Internships</span>
+      </div>
+      <div class="nav-item" onclick="nav('projects',this)" data-page="projects">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <span class="lbl">Projects</span>
+      </div>
+      <div class="nav-item" onclick="nav('assignments',this)" data-page="assignments">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span class="lbl">Assignments</span>
+      </div>
+      <div class="nav-item" onclick="nav('courses',this)" data-page="courses">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="lbl">Courses</span>
+      </div>
+      <div class="nav-item" onclick="nav('community',this)" data-page="community">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="lbl">Community</span>
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="sec-label lbl">Management</div>
+      <div class="nav-item" onclick="nav('analytics',this)" data-page="analytics">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="lbl">Analytics</span>
+      </div>
+      <div class="nav-item" onclick="nav('users',this)" data-page="users">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="lbl">Users</span>
+      </div>
+      <div class="nav-item" onclick="nav('settings',this)" data-page="settings">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="lbl">Settings</span>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-card" onclick="nav('intern',document.querySelector('[data-page=intern]'))">
+      <div class="av av-orange av-lg">PK</div>
+      <div class="user-info">
+        <div class="user-name">Priya Krishnan</div>
+        <div class="user-role">Intern · Data Science</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="topbar-btn" onclick="toggleSidebar()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </div>
+    <div class="topbar-search">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search courses, internships, people...">
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-btn notif-btn">
+        <div class="notif-dot"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div class="theme-toggle" onclick="toggleTheme()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <span id="theme-lbl">Light</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+<!-- ================= PAGE: ADMIN ================= -->
+<div class="page active" id="page-admin">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Admin Overview</div>
+      <div class="page-sub">Platform health at a glance · Updated just now</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-ghost btn-sm">Export Report</button>
+      <button class="btn btn-primary btn-sm">+ Invite User</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(249,115,22,.1);color:var(--a)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="stat-num">2,847</div>
+      <div class="stat-lbl">Total Users</div>
+      <div class="stat-change up">↑ 12.4% from last month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(59,130,246,.1);color:var(--blue)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      </div>
+      <div class="stat-num">384</div>
+      <div class="stat-lbl">Active Internships</div>
+      <div class="stat-change up">↑ 8.2% from last month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(168,85,247,.1);color:var(--violet)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      </div>
+      <div class="stat-num">127</div>
+      <div class="stat-lbl">Organizations</div>
+      <div class="stat-change up">↑ 5.1% from last month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(34,197,94,.1);color:var(--green)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="stat-num">68.3%</div>
+      <div class="stat-lbl">Avg Completion Rate</div>
+      <div class="stat-change up">↑ 3.7% from last month</div>
+    </div>
+  </div>
+  <div class="grid-65-35" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">Monthly Enrollments
+        <span class="badge badge-green">+12.4%</span>
+      </div>
+      <div class="chart-wrap">
+        <div class="bar-chart">
+          <div class="bar" style="height:45%"><span class="bar-label">Jul</span></div>
+          <div class="bar" style="height:60%"><span class="bar-label">Aug</span></div>
+          <div class="bar" style="height:50%"><span class="bar-label">Sep</span></div>
+          <div class="bar" style="height:75%"><span class="bar-label">Oct</span></div>
+          <div class="bar" style="height:65%"><span class="bar-label">Nov</span></div>
+          <div class="bar" style="height:80%"><span class="bar-label">Dec</span></div>
+          <div class="bar" style="height:90%"><span class="bar-label">Jan</span></div>
+          <div class="bar" style="height:70%"><span class="bar-label">Feb</span></div>
+          <div class="bar" style="height:100%;background:linear-gradient(180deg,var(--a),rgba(249,115,22,.5))"><span class="bar-label">Mar</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Role Distribution</div>
+      <div class="donut-wrap">
+        <div class="donut">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--bg3)" stroke-width="12"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--a)" stroke-width="12" stroke-dasharray="145 94" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--blue)" stroke-width="12" stroke-dasharray="56 183" stroke-dashoffset="-145" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--violet)" stroke-width="12" stroke-dasharray="23 216" stroke-dashoffset="-201" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--green)" stroke-width="12" stroke-dasharray="15 224" stroke-dashoffset="-224" stroke-linecap="round"/>
+          </svg>
+          <div class="donut-center"><div class="donut-val">2.8k</div><div class="donut-sub">Users</div></div>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-item"><div class="dl-dot" style="background:var(--a)"></div>Interns 60%</div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--blue)"></div>Faculty 23%</div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--violet)"></div>Orgs 10%</div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--green)"></div>Admin 7%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <div class="activity-item">
+        <div class="act-dot" style="background:var(--green)"></div>
+        <div><div class="act-text"><strong>Priya Krishnan</strong> submitted Assignment 3 — Data Visualization</div><div class="act-time">2 mins ago</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="act-dot" style="background:var(--blue)"></div>
+        <div><div class="act-text"><strong>TechCorp Inc.</strong> posted a new internship — ML Engineer</div><div class="act-time">15 mins ago</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="act-dot" style="background:var(--amber)"></div>
+        <div><div class="act-text"><strong>Dr. Kavitha R.</strong> reviewed 5 diary entries for Batch 2024</div><div class="act-time">1 hr ago</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="act-dot" style="background:var(--violet)"></div>
+        <div><div class="act-text"><strong>Rahul Mehta</strong> completed Python for Data Science course</div><div class="act-time">2 hrs ago</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="act-dot" style="background:var(--red)"></div>
+        <div><div class="act-text"><strong>Infosys Ltd.</strong> flagged 2 interns for attendance issues</div><div class="act-time">3 hrs ago</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Performing Courses</div>
+      <div class="kpi-mini">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--t1)">Python for Data Science</div>
+          <div style="font-size:11px;color:var(--t3)">842 enrolled</div>
+        </div>
+        <div style="text-align:right;min-width:70px">
+          <div style="font-size:12px;color:var(--green);font-weight:600;margin-bottom:4px">91%</div>
+          <div class="progress-track" style="width:70px"><div class="progress-bar green" style="width:91%"></div></div>
+        </div>
+      </div>
+      <div class="kpi-mini">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--t1)">Web Development Bootcamp</div>
+          <div style="font-size:11px;color:var(--t3)">673 enrolled</div>
+        </div>
+        <div style="text-align:right;min-width:70px">
+          <div style="font-size:12px;color:var(--blue);font-weight:600;margin-bottom:4px">87%</div>
+          <div class="progress-track" style="width:70px"><div class="progress-bar blue" style="width:87%"></div></div>
+        </div>
+      </div>
+      <div class="kpi-mini">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--t1)">Machine Learning Fundamentals</div>
+          <div style="font-size:11px;color:var(--t3)">521 enrolled</div>
+        </div>
+        <div style="text-align:right;min-width:70px">
+          <div style="font-size:12px;color:var(--a);font-weight:600;margin-bottom:4px">79%</div>
+          <div class="progress-track" style="width:70px"><div class="progress-bar" style="width:79%"></div></div>
+        </div>
+      </div>
+      <div class="kpi-mini">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--t1)">UI/UX Design Principles</div>
+          <div style="font-size:11px;color:var(--t3)">389 enrolled</div>
+        </div>
+        <div style="text-align:right;min-width:70px">
+          <div style="font-size:12px;color:var(--violet);font-weight:600;margin-bottom:4px">74%</div>
+          <div class="progress-track" style="width:70px"><div class="progress-bar violet" style="width:74%"></div></div>
+        </div>
+      </div>
+      <div class="kpi-mini">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--t1)">SQL & Database Design</div>
+          <div style="font-size:11px;color:var(--t3)">298 enrolled</div>
+        </div>
+        <div style="text-align:right;min-width:70px">
+          <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:4px">68%</div>
+          <div class="progress-track" style="width:70px"><div class="progress-bar" style="width:68%;background:linear-gradient(90deg,var(--amber),#fbbf24)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Recent Users
+      <button class="btn btn-ghost btn-sm" onclick="nav('users',document.querySelector('[data-page=users]'))">View All</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Role</th><th>Batch</th><th>Progress</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-orange">PK</div><span class="td-name">Priya Krishnan</span></div></td><td><span class="badge badge-orange">Intern</span></td><td>2024-A</td><td><div class="progress-track" style="width:80px"><div class="progress-bar" style="width:78%"></div></div></td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-blue">RM</div><span class="td-name">Rahul Mehta</span></div></td><td><span class="badge badge-orange">Intern</span></td><td>2024-A</td><td><div class="progress-track" style="width:80px"><div class="progress-bar green" style="width:92%"></div></div></td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-violet">KR</div><span class="td-name">Dr. Kavitha R.</span></div></td><td><span class="badge badge-blue">Faculty</span></td><td>—</td><td>—</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-green">SA</div><span class="td-name">Sneha Agarwal</span></div></td><td><span class="badge badge-orange">Intern</span></td><td>2024-B</td><td><div class="progress-track" style="width:80px"><div class="progress-bar" style="width:45%"></div></div></td><td><span class="badge badge-amber">At Risk</span></td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-red">AK</div><span class="td-name">Arjun Kumar</span></div></td><td><span class="badge badge-violet">Org</span></td><td>—</td><td>—</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: INTERN ================= -->
+<div class="page" id="page-intern">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">My Dashboard</div>
+      <div class="page-sub">Welcome back, Priya! 🎉 Keep up the great work.</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-ghost btn-sm" onclick="nav('courses',document.querySelector('[data-page=courses]'))">Browse Courses</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('diary')">+ Log Entry</button>
+    </div>
+  </div>
+  <div class="grid-65-35" style="margin-bottom:16px">
+    <div>
+      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px">
+        <div class="stat-card">
+          <div class="stat-num">78%</div>
+          <div class="stat-lbl">Overall Progress</div>
+          <div class="stat-change up">↑ 5% this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">14</div>
+          <div class="stat-lbl">Days Logged</div>
+          <div class="stat-change up">↑ Streak: 7 days</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">3/5</div>
+          <div class="stat-lbl">Assignments Done</div>
+          <div class="stat-change" style="color:var(--amber)">⚠ 2 pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">4.2</div>
+          <div class="stat-lbl">Avg Faculty Rating</div>
+          <div class="stat-change up">↑ Top 20% in batch</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">My Projects
+          <button class="btn btn-ghost btn-sm" onclick="nav('projects',document.querySelector('[data-page=projects]'))">View Board</button>
+        </div>
+        <div class="item-row">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">E-Commerce Dashboard</div>
+            <div style="font-size:12px;color:var(--t3);margin-top:2px">TechCorp Inc. · React + Node.js</div>
+            <div class="progress-track" style="margin-top:8px"><div class="progress-bar" style="width:65%"></div></div>
+          </div>
+          <span class="badge badge-blue" style="flex-shrink:0">65%</span>
+        </div>
+        <div class="item-row">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Customer Sentiment Analysis</div>
+            <div style="font-size:12px;color:var(--t3);margin-top:2px">DataLabs · Python + NLP</div>
+            <div class="progress-track" style="margin-top:8px"><div class="progress-bar green" style="width:40%"></div></div>
+          </div>
+          <span class="badge badge-orange" style="flex-shrink:0">40%</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Pending Assignments
+          <button class="btn btn-ghost btn-sm" onclick="nav('assignments',document.querySelector('[data-page=assignments]'))">View All</button>
+        </div>
+        <div class="item-row">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Assignment 4 — API Design</div>
+            <div style="font-size:12px;color:var(--t3)">Due: Mar 22, 2026</div>
+          </div>
+          <span class="badge badge-amber">Pending</span>
+        </div>
+        <div class="item-row">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Assignment 5 — Final Report</div>
+            <div style="font-size:12px;color:var(--t3)">Due: Mar 30, 2026</div>
+          </div>
+          <span class="badge badge-red">Overdue</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="text-align:center;padding:16px 0">
+          <div class="av av-orange av-lg" style="width:60px;height:60px;font-size:22px;margin:0 auto 12px">PK</div>
+          <div style="font-weight:800;font-size:16px;color:var(--t1);font-family:'Syne',sans-serif">Priya Krishnan</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">Data Science Intern · Batch 2024-A</div>
+          <div style="display:flex;justify-content:center;gap:6px;margin-top:10px">
+            <span class="badge badge-orange">Data Science</span>
+            <span class="badge badge-blue">Python</span>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div style="font-size:13px;color:var(--t2);margin-bottom:8px;font-weight:600">Internship Progress</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:6px"><span>Overall Completion</span><span style="color:var(--a);font-weight:700">78%</span></div>
+        <div class="progress-track"><div class="progress-bar" style="width:78%"></div></div>
+        <div style="margin-top:12px;font-size:12px;color:var(--t3)">6 of 12 weeks completed</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent Diary Entries</div>
+        <div class="diary-entry">
+          <div class="de-date">March 17, 2026</div>
+          <div class="de-title">Sprint Planning & API Design</div>
+          <div class="de-text">Participated in sprint planning, designed RESTful APIs for the product module. Learned about rate limiting and auth middleware.</div>
+        </div>
+        <div class="diary-entry">
+          <div class="de-date">March 16, 2026</div>
+          <div class="de-title">Frontend Integration</div>
+          <div class="de-text">Connected React frontend to Express backend. Resolved CORS issues and optimized API response times by 40%.</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:10px" onclick="openModal('diary')">+ New Entry</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: FACULTY ================= -->
+<div class="page" id="page-faculty">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Faculty Dashboard</div>
+      <div class="page-sub">Dr. Kavitha R. · Data Science Department</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-primary btn-sm">+ Assign Task</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num">24</div><div class="stat-lbl">Assigned Interns</div><div class="stat-change up">↑ 2 new this week</div></div>
+    <div class="stat-card"><div class="stat-num">8</div><div class="stat-lbl">Pending Reviews</div><div class="stat-change" style="color:var(--amber)">⚠ Action needed</div></div>
+    <div class="stat-card"><div class="stat-num">72%</div><div class="stat-lbl">Avg Batch Progress</div><div class="stat-change up">↑ 4% this week</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-lbl">At-Risk Interns</div><div class="stat-change down">↓ Needs attention</div></div>
+  </div>
+  <div class="grid-65-35">
+    <div class="card">
+      <div class="card-title">Assigned Interns — Batch 2024-A
+        <span class="badge badge-blue">24 interns</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Intern</th><th>Progress</th><th>Last Active</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-orange">PK</div><span class="td-name">Priya Krishnan</span></div></td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:70px"><div class="progress-bar" style="width:78%"></div></div><span style="font-size:12px;color:var(--t3)">78%</span></div></td><td style="color:var(--t3);font-size:12px">2h ago</td><td><span class="badge badge-green">On Track</span></td><td><button class="btn btn-ghost btn-sm">Review</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-blue">RM</div><span class="td-name">Rahul Mehta</span></div></td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:70px"><div class="progress-bar green" style="width:92%"></div></div><span style="font-size:12px;color:var(--t3)">92%</span></div></td><td style="color:var(--t3);font-size:12px">1h ago</td><td><span class="badge badge-green">Excellent</span></td><td><button class="btn btn-ghost btn-sm">Review</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-green">SA</div><span class="td-name">Sneha Agarwal</span></div></td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:70px"><div class="progress-bar" style="width:45%;background:linear-gradient(90deg,var(--red),#f87171)"></div></div><span style="font-size:12px;color:var(--t3)">45%</span></div></td><td style="color:var(--t3);font-size:12px">2d ago</td><td><span class="badge badge-red">At Risk</span></td><td><button class="btn btn-ghost btn-sm">Review</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-amber">VN</div><span class="td-name">Vikram Nair</span></div></td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:70px"><div class="progress-bar" style="width:61%"></div></div><span style="font-size:12px;color:var(--t3)">61%</span></div></td><td style="color:var(--t3);font-size:12px">5h ago</td><td><span class="badge badge-amber">Needs Push</span></td><td><button class="btn btn-ghost btn-sm">Review</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Assignment Reviews
+          <span class="badge badge-amber">8 pending</span>
+        </div>
+        <div class="item-row">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Assignment 3 — Data Viz</div>
+            <div style="font-size:12px;color:var(--t3)">Priya Krishnan · Submitted Mar 17</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-success btn-sm">Accept</button>
+            <button class="btn btn-danger btn-sm">Reject</button>
+          </div>
+        </div>
+        <div class="item-row">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Assignment 3 — Data Viz</div>
+            <div style="font-size:12px;color:var(--t3)">Rahul Mehta · Submitted Mar 16</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-success btn-sm">Accept</button>
+            <button class="btn btn-danger btn-sm">Reject</button>
+          </div>
+        </div>
+        <div class="item-row">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Diary — Week 6</div>
+            <div style="font-size:12px;color:var(--t3)">Sneha Agarwal · Submitted Mar 15</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-success btn-sm">Accept</button>
+            <button class="btn btn-danger btn-sm">Reject</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Skill Progress — Batch Avg</div>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:4px"><span>Python</span><span>84%</span></div>
+          <div class="progress-track"><div class="progress-bar green" style="width:84%"></div></div>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:4px"><span>Machine Learning</span><span>67%</span></div>
+          <div class="progress-track"><div class="progress-bar" style="width:67%"></div></div>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:4px"><span>SQL</span><span>72%</span></div>
+          <div class="progress-track"><div class="progress-bar blue" style="width:72%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:4px"><span>Communication</span><span>79%</span></div>
+          <div class="progress-track"><div class="progress-bar violet" style="width:79%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: ORG ================= -->
+<div class="page" id="page-org">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Organization Dashboard</div>
+      <div class="page-sub">TechCorp Inc. · Industry Partner</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-primary btn-sm" onclick="openModal('post-internship')">+ Post Internship</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num">6</div><div class="stat-lbl">Active Postings</div><div class="stat-change up">↑ 2 new this month</div></div>
+    <div class="stat-card"><div class="stat-num">148</div><div class="stat-lbl">Total Applicants</div><div class="stat-change up">↑ 23 new today</div></div>
+    <div class="stat-card"><div class="stat-num">12</div><div class="stat-lbl">Active Interns</div><div class="stat-change up">All on track</div></div>
+    <div class="stat-card"><div class="stat-num">4.6</div><div class="stat-lbl">Avg Intern Rating</div><div class="stat-change up">↑ Top 10% in platform</div></div>
+  </div>
+  <div class="grid-65-35">
+    <div class="card">
+      <div class="card-title">Posted Internships</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Applicants</th><th>Shortlisted</th><th>Slots</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="td-name">ML Engineer Intern</td><td>47</td><td>8</td><td>3/5</td><td><span class="badge badge-green">Active</span></td></tr>
+            <tr><td class="td-name">Frontend Developer Intern</td><td>38</td><td>6</td><td>2/4</td><td><span class="badge badge-green">Active</span></td></tr>
+            <tr><td class="td-name">Data Analyst Intern</td><td>29</td><td>5</td><td>1/3</td><td><span class="badge badge-amber">Reviewing</span></td></tr>
+            <tr><td class="td-name">Backend Developer Intern</td><td>22</td><td>4</td><td>2/2</td><td><span class="badge badge-blue">Filled</span></td></tr>
+            <tr><td class="td-name">DevOps Intern</td><td>12</td><td>2</td><td>0/2</td><td><span class="badge badge-red">Open</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Shortlisted Candidates
+          <span class="badge badge-amber">8 pending</span>
+        </div>
+        <div class="item-row">
+          <div class="av av-orange">PK</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Priya Krishnan</div>
+            <div style="font-size:12px;color:var(--t3)">ML Engineer · 4.2 GPA</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-success btn-sm">✓</button>
+            <button class="btn btn-danger btn-sm">✗</button>
+          </div>
+        </div>
+        <div class="item-row">
+          <div class="av av-blue">RM</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Rahul Mehta</div>
+            <div style="font-size:12px;color:var(--t3)">Frontend Dev · 3.9 GPA</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-success btn-sm">✓</button>
+            <button class="btn btn-danger btn-sm">✗</button>
+          </div>
+        </div>
+        <div class="item-row">
+          <div class="av av-violet">AN</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--t1)">Ananya Singh</div>
+            <div style="font-size:12px;color:var(--t3)">Data Analyst · 4.0 GPA</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-success btn-sm">✓</button>
+            <button class="btn btn-danger btn-sm">✗</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Active Project Status</div>
+        <div class="item-row">
+          <div style="flex:1"><div style="font-weight:600;font-size:13px;color:var(--t1)">E-Commerce Dashboard</div>
+          <div class="progress-track" style="margin-top:6px"><div class="progress-bar" style="width:65%"></div></div></div>
+          <span style="font-size:13px;font-weight:700;color:var(--a);margin-left:10px">65%</span>
+        </div>
+        <div class="item-row">
+          <div style="flex:1"><div style="font-weight:600;font-size:13px;color:var(--t1)">API Gateway Service</div>
+          <div class="progress-track" style="margin-top:6px"><div class="progress-bar green" style="width:88%"></div></div></div>
+          <span style="font-size:13px;font-weight:700;color:var(--green);margin-left:10px">88%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: INTERNSHIPS ================= -->
+<div class="page" id="page-internships">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Internship Listings</div>
+      <div class="page-sub">384 opportunities available · Updated daily</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-ghost btn-sm">Saved (3)</button>
+      <button class="btn btn-primary btn-sm">My Applications</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px;padding:14px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <select class="form-select" style="width:auto"><option>All Domains</option><option>Technology</option><option>Design</option><option>Data Science</option></select>
+      <select class="form-select" style="width:auto"><option>Any Duration</option><option>1-3 months</option><option>3-6 months</option><option>6+ months</option></select>
+      <select class="form-select" style="width:auto"><option>Any Stipend</option><option>₹10k+</option><option>₹20k+</option><option>₹30k+</option></select>
+      <select class="form-select" style="width:auto"><option>Any Location</option><option>Bangalore</option><option>Mumbai</option><option>Remote</option></select>
+      <input class="form-input" placeholder="Search roles..." style="flex:1;min-width:150px">
+    </div>
+  </div>
+  <div class="intern-grid">
+    <div class="intern-card" onclick="nav('internship-detail',document.querySelector('[data-page=internship-detail]'))">
+      <div class="ic-top">
+        <div class="ic-logo">🏢</div>
+        <div class="ic-info">
+          <div class="ic-title">ML Engineer Intern</div>
+          <div class="ic-company">TechCorp Inc. · Bangalore · ₹25,000/mo</div>
+        </div>
+        <span class="badge badge-green">Open</span>
+      </div>
+      <div class="ic-tags"><span class="ic-tag">Python</span><span class="ic-tag">TensorFlow</span><span class="ic-tag">MLOps</span></div>
+      <div class="ic-footer">
+        <span style="font-size:12px;color:var(--t3)">3 slots · 47 applied</span>
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openModal('apply')">Apply Now</button>
+      </div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-bar" style="width:60%"></div></div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px">3/5 slots filled</div>
+    </div>
+    <div class="intern-card" onclick="nav('internship-detail',document.querySelector('[data-page=internship-detail]'))">
+      <div class="ic-top">
+        <div class="ic-logo">💡</div>
+        <div class="ic-info">
+          <div class="ic-title">Frontend Developer Intern</div>
+          <div class="ic-company">InnoTech Solutions · Remote · ₹20,000/mo</div>
+        </div>
+        <span class="badge badge-green">Open</span>
+      </div>
+      <div class="ic-tags"><span class="ic-tag">React</span><span class="ic-tag">TypeScript</span><span class="ic-tag">CSS</span></div>
+      <div class="ic-footer">
+        <span style="font-size:12px;color:var(--t3)">4 slots · 38 applied</span>
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openModal('apply')">Apply Now</button>
+      </div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-bar" style="width:50%"></div></div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px">2/4 slots filled</div>
+    </div>
+    <div class="intern-card" onclick="nav('internship-detail',document.querySelector('[data-page=internship-detail]'))">
+      <div class="ic-top">
+        <div class="ic-logo">📊</div>
+        <div class="ic-info">
+          <div class="ic-title">Data Analyst Intern</div>
+          <div class="ic-company">DataLabs · Mumbai · ₹18,000/mo</div>
+        </div>
+        <span class="badge badge-amber">Closing Soon</span>
+      </div>
+      <div class="ic-tags"><span class="ic-tag">SQL</span><span class="ic-tag">Power BI</span><span class="ic-tag">Python</span></div>
+      <div class="ic-footer">
+        <span style="font-size:12px;color:var(--t3)">2 slots · 29 applied</span>
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openModal('apply')">Apply Now</button>
+      </div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-bar" style="width:33%"></div></div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px">1/3 slots filled</div>
+    </div>
+    <div class="intern-card" onclick="nav('internship-detail',document.querySelector('[data-page=internship-detail]'))">
+      <div class="ic-top">
+        <div class="ic-logo">🎨</div>
+        <div class="ic-info">
+          <div class="ic-title">UI/UX Design Intern</div>
+          <div class="ic-company">PixelCraft · Bangalore · ₹22,000/mo</div>
+        </div>
+        <span class="badge badge-green">Open</span>
+      </div>
+      <div class="ic-tags"><span class="ic-tag">Figma</span><span class="ic-tag">Prototyping</span><span class="ic-tag">Research</span></div>
+      <div class="ic-footer">
+        <span style="font-size:12px;color:var(--t3)">2 slots · 21 applied</span>
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openModal('apply')">Apply Now</button>
+      </div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-bar" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px">0/2 slots filled</div>
+    </div>
+    <div class="intern-card" onclick="nav('internship-detail',document.querySelector('[data-page=internship-detail]'))">
+      <div class="ic-top">
+        <div class="ic-logo">⚙️</div>
+        <div class="ic-info">
+          <div class="ic-title">DevOps Engineer Intern</div>
+          <div class="ic-company">CloudSys · Hyderabad · ₹28,000/mo</div>
+        </div>
+        <span class="badge badge-green">Open</span>
+      </div>
+      <div class="ic-tags"><span class="ic-tag">Docker</span><span class="ic-tag">Kubernetes</span><span class="ic-tag">CI/CD</span></div>
+      <div class="ic-footer">
+        <span style="font-size:12px;color:var(--t3)">2 slots · 15 applied</span>
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openModal('apply')">Apply Now</button>
+      </div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-bar" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px">0/2 slots filled</div>
+    </div>
+    <div class="intern-card" onclick="nav('internship-detail',document.querySelector('[data-page=internship-detail]'))">
+      <div class="ic-top">
+        <div class="ic-logo">📱</div>
+        <div class="ic-info">
+          <div class="ic-title">Mobile App Developer Intern</div>
+          <div class="ic-company">AppWorks · Remote · ₹15,000/mo</div>
+        </div>
+        <span class="badge badge-red">Closed</span>
+      </div>
+      <div class="ic-tags"><span class="ic-tag">React Native</span><span class="ic-tag">Flutter</span></div>
+      <div class="ic-footer">
+        <span style="font-size:12px;color:var(--t3)">3 slots · 52 applied</span>
+        <button class="btn btn-secondary btn-sm" disabled>Closed</button>
+      </div>
+      <div class="progress-track" style="margin-top:10px"><div class="progress-bar green" style="width:100%"></div></div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px">3/3 slots filled</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: INTERNSHIP DETAIL ================= -->
+<div class="page" id="page-internship-detail">
+  <div class="page-header">
+    <div class="ph-left">
+      <button class="btn btn-ghost btn-sm" onclick="nav('internships',document.querySelector('[data-page=internships]'))" style="margin-bottom:8px">← Back to Listings</button>
+      <div class="page-title">ML Engineer Intern</div>
+      <div class="page-sub">TechCorp Inc. · Bangalore · Posted March 10, 2026</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-ghost btn-sm">♡ Save</button>
+      <button class="btn btn-primary" onclick="openModal('apply')">Apply Now</button>
+    </div>
+  </div>
+  <div class="grid-65-35">
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">About the Role</div>
+        <p style="font-size:14px;color:var(--t2);line-height:1.8;margin-bottom:14px">We are looking for a motivated Machine Learning Engineer intern to join our AI Research team. You will work alongside senior engineers to build and deploy production-ready ML models, contribute to our MLOps pipeline, and help shape the future of AI at TechCorp.</p>
+        <div class="card-title" style="margin-top:16px">Key Responsibilities</div>
+        <ul style="font-size:13px;color:var(--t2);line-height:2;padding-left:18px">
+          <li>Design, train, and evaluate machine learning models using Python and TensorFlow</li>
+          <li>Collaborate with the data engineering team to build robust data pipelines</li>
+          <li>Participate in code reviews and contribute to engineering best practices</li>
+          <li>Write technical documentation and present findings to stakeholders</li>
+          <li>Work on real-world datasets and solve production-scale problems</li>
+        </ul>
+        <div class="card-title" style="margin-top:16px">Requirements</div>
+        <ul style="font-size:13px;color:var(--t2);line-height:2;padding-left:18px">
+          <li>Currently pursuing B.Tech/M.Tech in CS, Data Science, or related field</li>
+          <li>Strong foundation in Python, NumPy, Pandas, and Scikit-learn</li>
+          <li>Familiarity with TensorFlow or PyTorch</li>
+          <li>Understanding of statistics and linear algebra</li>
+          <li>Good communication and teamwork skills</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Tech Stack</div>
+        <div class="pill-tags">
+          <span class="tag">Python</span><span class="tag">TensorFlow</span><span class="tag">PyTorch</span>
+          <span class="tag">MLflow</span><span class="tag">Docker</span><span class="tag">GCP</span>
+          <span class="tag">Git</span><span class="tag">FastAPI</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Internship Details</div>
+        <div class="kpi-mini"><span style="color:var(--t3);font-size:13px">Company</span><span style="font-weight:600;font-size:13px;color:var(--t1)">TechCorp Inc.</span></div>
+        <div class="kpi-mini"><span style="color:var(--t3);font-size:13px">Location</span><span style="font-weight:600;font-size:13px;color:var(--t1)">Bangalore, India</span></div>
+        <div class="kpi-mini"><span style="color:var(--t3);font-size:13px">Duration</span><span style="font-weight:600;font-size:13px;color:var(--t1)">6 months</span></div>
+        <div class="kpi-mini"><span style="color:var(--t3);font-size:13px">Stipend</span><span style="font-weight:600;font-size:13px;color:var(--green)">₹25,000 / month</span></div>
+        <div class="kpi-mini"><span style="color:var(--t3);font-size:13px">Slots</span><span style="font-weight:600;font-size:13px;color:var(--t1)">3 of 5 filled</span></div>
+        <div class="kpi-mini"><span style="color:var(--t3);font-size:13px">Deadline</span><span style="font-weight:600;font-size:13px;color:var(--red)">Mar 25, 2026</span></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px" onclick="openModal('apply')">Apply Now</button>
+      </div>
+      <div class="card">
+        <div class="card-title">About TechCorp</div>
+        <p style="font-size:13px;color:var(--t2);line-height:1.7">TechCorp Inc. is a leading AI solutions company with 500+ employees across 12 cities. We build enterprise-grade ML products for Fortune 500 clients and are passionate about nurturing the next generation of engineers.</p>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <div style="text-align:center;flex:1"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--t1)">500+</div><div style="font-size:11px;color:var(--t3)">Employees</div></div>
+          <div style="text-align:center;flex:1"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--t1)">12</div><div style="font-size:11px;color:var(--t3)">Cities</div></div>
+          <div style="text-align:center;flex:1"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--t1)">4.8★</div><div style="font-size:11px;color:var(--t3)">Rating</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: PROJECTS ================= -->
+<div class="page" id="page-projects">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Project Collaboration</div>
+      <div class="page-sub">E-Commerce Dashboard · TechCorp Inc.</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-ghost btn-sm">+ Add Task</button>
+      <button class="btn btn-primary btn-sm">Share Board</button>
+    </div>
+  </div>
+  <div class="kanban-board">
+    <div class="kanban-col">
+      <div class="kanban-header">
+        <div class="kanban-title"><div style="width:8px;height:8px;border-radius:50%;background:var(--t4)"></div>To Do <span class="k-count">4</span></div>
+        <button class="btn btn-ghost btn-sm">+</button>
+      </div>
+      <div class="kanban-card">
+        <div class="kc-title">Set up CI/CD pipeline</div>
+        <div class="kc-desc">Configure GitHub Actions for automated testing and deployment.</div>
+        <div class="kc-footer">
+          <span class="badge badge-red">High Priority</span>
+          <div class="kc-avatars"><div class="av av-sm av-orange">PK</div></div>
+        </div>
+      </div>
+      <div class="kanban-card">
+        <div class="kc-title">Database schema design</div>
+        <div class="kc-desc">Design normalized schema for products, orders, and users.</div>
+        <div class="kc-footer">
+          <span class="badge badge-amber">Medium</span>
+          <div class="kc-avatars"><div class="av av-sm av-blue">RM</div></div>
+        </div>
+      </div>
+      <div class="kanban-card">
+        <div class="kc-title">Write API documentation</div>
+        <div class="kc-desc">Document all REST endpoints using Swagger/OpenAPI.</div>
+        <div class="kc-footer">
+          <span class="badge badge-blue">Low</span>
+          <div class="kc-avatars"><div class="av av-sm av-green">SA</div><div class="av av-sm av-orange">PK</div></div>
+        </div>
+      </div>
+      <div class="kanban-card">
+        <div class="kc-title">Performance testing</div>
+        <div class="kc-desc">Load test APIs with k6, target 1000 concurrent users.</div>
+        <div class="kc-footer">
+          <span class="badge badge-amber">Medium</span>
+          <div class="kc-avatars"><div class="av av-sm av-violet">VN</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-header">
+        <div class="kanban-title"><div style="width:8px;height:8px;border-radius:50%;background:var(--a)"></div>In Progress <span class="k-count">3</span></div>
+        <button class="btn btn-ghost btn-sm">+</button>
+      </div>
+      <div class="kanban-card" style="border-color:rgba(249,115,22,.25)">
+        <div class="kc-title">Product dashboard UI</div>
+        <div class="kc-desc">Build React components for the analytics dashboard with charts.</div>
+        <div style="margin-bottom:8px">
+          <div class="progress-track"><div class="progress-bar" style="width:65%"></div></div>
+          <div style="font-size:11px;color:var(--t4);margin-top:3px">65% complete</div>
+        </div>
+        <div class="kc-footer">
+          <span class="badge badge-red">High Priority</span>
+          <div class="kc-avatars"><div class="av av-sm av-orange">PK</div><div class="av av-sm av-blue">RM</div></div>
+        </div>
+      </div>
+      <div class="kanban-card" style="border-color:rgba(249,115,22,.25)">
+        <div class="kc-title">Authentication module</div>
+        <div class="kc-desc">JWT-based auth with refresh token rotation and role-based access.</div>
+        <div style="margin-bottom:8px">
+          <div class="progress-track"><div class="progress-bar green" style="width:80%"></div></div>
+          <div style="font-size:11px;color:var(--t4);margin-top:3px">80% complete</div>
+        </div>
+        <div class="kc-footer">
+          <span class="badge badge-amber">Medium</span>
+          <div class="kc-avatars"><div class="av av-sm av-violet">VN</div></div>
+        </div>
+      </div>
+      <div class="kanban-card" style="border-color:rgba(249,115,22,.25)">
+        <div class="kc-title">Order management API</div>
+        <div class="kc-desc">CRUD endpoints for orders with status tracking and webhooks.</div>
+        <div style="margin-bottom:8px">
+          <div class="progress-track"><div class="progress-bar blue" style="width:45%"></div></div>
+          <div style="font-size:11px;color:var(--t4);margin-top:3px">45% complete</div>
+        </div>
+        <div class="kc-footer">
+          <span class="badge badge-red">High Priority</span>
+          <div class="kc-avatars"><div class="av av-sm av-green">SA</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-header">
+        <div class="kanban-title"><div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div>Done <span class="k-count">5</span></div>
+      </div>
+      <div class="kanban-card" style="opacity:.7">
+        <div class="kc-title">Project setup & boilerplate</div>
+        <div class="kc-desc">Create React app, configure ESLint, Prettier, and directory structure.</div>
+        <div class="kc-footer"><span class="badge badge-green">Completed</span><div class="kc-avatars"><div class="av av-sm av-orange">PK</div></div></div>
+      </div>
+      <div class="kanban-card" style="opacity:.7">
+        <div class="kc-title">Design system setup</div>
+        <div class="kc-desc">Implement design tokens, components library, and Storybook docs.</div>
+        <div class="kc-footer"><span class="badge badge-green">Completed</span><div class="kc-avatars"><div class="av av-sm av-blue">RM</div></div></div>
+      </div>
+      <div class="kanban-card" style="opacity:.7">
+        <div class="kc-title">User research & wireframes</div>
+        <div class="kc-desc">Conducted 8 user interviews, created wireframes in Figma.</div>
+        <div class="kc-footer"><span class="badge badge-green">Completed</span><div class="kc-avatars"><div class="av av-sm av-violet">VN</div></div></div>
+      </div>
+      <div class="kanban-card" style="opacity:.7">
+        <div class="kc-title">API architecture planning</div>
+        <div class="kc-desc">Defined REST API contracts, chose tech stack, and set up Postman.</div>
+        <div class="kc-footer"><span class="badge badge-green">Completed</span><div class="kc-avatars"><div class="av av-sm av-green">SA</div></div></div>
+      </div>
+      <div class="kanban-card" style="opacity:.7">
+        <div class="kc-title">Environment setup</div>
+        <div class="kc-desc">Docker Compose for local dev, staging env on GCP, secrets management.</div>
+        <div class="kc-footer"><span class="badge badge-green">Completed</span><div class="kc-avatars"><div class="av av-sm av-orange">PK</div><div class="av av-sm av-blue">RM</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: ASSIGNMENTS ================= -->
+<div class="page" id="page-assignments">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Assignments</div>
+      <div class="page-sub">Manage and submit your coursework</div>
+    </div>
+    <div class="ph-right">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this,'tab-all')">All</div>
+        <div class="tab" onclick="switchTab(this,'tab-pending')">Pending</div>
+        <div class="tab" onclick="switchTab(this,'tab-submitted')">Submitted</div>
+        <div class="tab" onclick="switchTab(this,'tab-graded')">Graded</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Assignment</th><th>Course</th><th>Due Date</th><th>Status</th><th>Grade</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><div class="td-name">Assignment 1 — Python Basics</div><div style="font-size:11px;color:var(--t4)">Intro to programming constructs</div></td>
+            <td style="color:var(--t3)">Python for DS</td>
+            <td style="font-size:12px;color:var(--t3)">Feb 15, 2026</td>
+            <td><span class="badge badge-green">Graded</span></td>
+            <td style="font-weight:700;color:var(--green)">92/100</td>
+            <td><button class="btn btn-ghost btn-sm">View Feedback</button></td>
+          </tr>
+          <tr>
+            <td><div class="td-name">Assignment 2 — Data Cleaning</div><div style="font-size:11px;color:var(--t4)">Pandas, handling null values</div></td>
+            <td style="color:var(--t3)">Python for DS</td>
+            <td style="font-size:12px;color:var(--t3)">Mar 1, 2026</td>
+            <td><span class="badge badge-green">Graded</span></td>
+            <td style="font-weight:700;color:var(--green)">87/100</td>
+            <td><button class="btn btn-ghost btn-sm">View Feedback</button></td>
+          </tr>
+          <tr>
+            <td><div class="td-name">Assignment 3 — Data Visualization</div><div style="font-size:11px;color:var(--t4)">Matplotlib, Seaborn charts</div></td>
+            <td style="color:var(--t3)">Python for DS</td>
+            <td style="font-size:12px;color:var(--t3)">Mar 15, 2026</td>
+            <td><span class="badge badge-blue">Submitted</span></td>
+            <td style="color:var(--t4)">Pending</td>
+            <td><button class="btn btn-ghost btn-sm">View</button></td>
+          </tr>
+          <tr>
+            <td><div class="td-name">Assignment 4 — API Design</div><div style="font-size:11px;color:var(--t4)">RESTful API best practices</div></td>
+            <td style="color:var(--t3)">Web Dev</td>
+            <td style="font-size:12px;color:var(--amber)">Mar 22, 2026</td>
+            <td><span class="badge badge-amber">Pending</span></td>
+            <td style="color:var(--t4)">—</td>
+            <td><button class="btn btn-primary btn-sm" onclick="openModal('submit')">Submit</button></td>
+          </tr>
+          <tr>
+            <td><div class="td-name">Assignment 5 — Final Report</div><div style="font-size:11px;color:var(--t4)">Internship summary report</div></td>
+            <td style="color:var(--t3)">Internship</td>
+            <td style="font-size:12px;color:var(--red)">Mar 10, 2026</td>
+            <td><span class="badge badge-red">Overdue</span></td>
+            <td style="color:var(--t4)">—</td>
+            <td><button class="btn btn-danger btn-sm" onclick="openModal('submit')">Submit Late</button></td>
+          </tr>
+          <tr>
+            <td><div class="td-name">Mini Project — ML Model</div><div style="font-size:11px;color:var(--t4)">Build classification model</div></td>
+            <td style="color:var(--t3)">ML Fundamentals</td>
+            <td style="font-size:12px;color:var(--t3)">Apr 5, 2026</td>
+            <td><span class="badge badge-gray">Upcoming</span></td>
+            <td style="color:var(--t4)">—</td>
+            <td><button class="btn btn-ghost btn-sm" disabled>Not yet</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: COURSES ================= -->
+<div class="page" id="page-courses">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Course Library</div>
+      <div class="page-sub">Learn at your own pace · 120+ courses available</div>
+    </div>
+    <div class="ph-right">
+      <div class="tabs">
+        <div class="tab active">My Courses</div>
+        <div class="tab">All Courses</div>
+        <div class="tab">Certificates</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-65-35">
+    <div>
+      <div style="margin-bottom:18px">
+        <div style="font-weight:700;font-size:15px;color:var(--t1);margin-bottom:12px">Continue Learning</div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;gap:14px">
+            <div style="width:80px;height:60px;background:linear-gradient(135deg,#1e3a5f,#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🐍</div>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:14px;color:var(--t1)">Python for Data Science</div>
+              <div style="font-size:12px;color:var(--t3);margin-top:2px">Module 7 of 12: Advanced Pandas</div>
+              <div class="progress-track" style="margin-top:8px"><div class="progress-bar" style="width:62%"></div></div>
+              <div style="font-size:11px;color:var(--t3);margin-top:3px">62% complete · ~3h remaining</div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="align-self:center;flex-shrink:0">Resume</button>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:14px">
+            <div style="width:80px;height:60px;background:linear-gradient(135deg,#1a2744,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🤖</div>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:14px;color:var(--t1)">Machine Learning Fundamentals</div>
+              <div style="font-size:12px;color:var(--t3);margin-top:2px">Module 3 of 10: Linear Regression</div>
+              <div class="progress-track" style="margin-top:8px"><div class="progress-bar violet" style="width:28%"></div></div>
+              <div style="font-size:11px;color:var(--t3);margin-top:3px">28% complete · ~8h remaining</div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="align-self:center;flex-shrink:0">Resume</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-weight:700;font-size:15px;color:var(--t1);margin-bottom:12px">Recommended For You</div>
+      <div class="course-grid">
+        <div class="course-card">
+          <div class="cc-thumb" style="background:linear-gradient(135deg,#0f2027,#2c5364)">🗄️</div>
+          <div class="cc-body">
+            <div class="cc-title">SQL & Database Design</div>
+            <div class="cc-meta">8 modules · 6h total · Beginner</div>
+            <div class="cc-footer"><span class="badge badge-green">Free</span><button class="btn btn-primary btn-sm">Enroll</button></div>
+          </div>
+        </div>
+        <div class="course-card">
+          <div class="cc-thumb" style="background:linear-gradient(135deg,#1a0533,#7c3aed)">📊</div>
+          <div class="cc-body">
+            <div class="cc-title">Statistics for ML</div>
+            <div class="cc-meta">10 modules · 12h total · Intermediate</div>
+            <div class="cc-footer"><span class="badge badge-orange">Pro</span><button class="btn btn-primary btn-sm">Enroll</button></div>
+          </div>
+        </div>
+        <div class="course-card">
+          <div class="cc-thumb" style="background:linear-gradient(135deg,#0d2136,#0ea5e9)">☁️</div>
+          <div class="cc-body">
+            <div class="cc-title">Cloud Computing Basics</div>
+            <div class="cc-meta">6 modules · 5h total · Beginner</div>
+            <div class="cc-footer"><span class="badge badge-green">Free</span><button class="btn btn-primary btn-sm">Enroll</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Module List — Python for DS</div>
+        <div class="item-row">
+          <div style="display:flex;align-items:center;gap:8px;flex:1">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0">✓</div>
+            <div style="font-size:13px;color:var(--t2)">1. Intro to Python</div>
+          </div>
+          <span style="font-size:12px;color:var(--green)">Done</span>
+        </div>
+        <div class="item-row">
+          <div style="display:flex;align-items:center;gap:8px;flex:1">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0">✓</div>
+            <div style="font-size:13px;color:var(--t2)">2. Data Structures</div>
+          </div>
+          <span style="font-size:12px;color:var(--green)">Done</span>
+        </div>
+        <div class="item-row" style="background:rgba(249,115,22,.06);border-radius:8px;border:1px solid rgba(249,115,22,.15)">
+          <div style="display:flex;align-items:center;gap:8px;flex:1">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0">▶</div>
+            <div style="font-size:13px;color:var(--t1);font-weight:600">7. Advanced Pandas</div>
+          </div>
+          <span style="font-size:12px;color:var(--a)">Current</span>
+        </div>
+        <div class="item-row" style="opacity:.5">
+          <div style="display:flex;align-items:center;gap:8px;flex:1">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--t4);flex-shrink:0">🔒</div>
+            <div style="font-size:13px;color:var(--t3)">8. Matplotlib & Seaborn</div>
+          </div>
+          <span style="font-size:12px;color:var(--t4)">Locked</span>
+        </div>
+        <div class="item-row" style="opacity:.5">
+          <div style="display:flex;align-items:center;gap:8px;flex:1">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--t4);flex-shrink:0">🔒</div>
+            <div style="font-size:13px;color:var(--t3)">9. ML with Scikit-learn</div>
+          </div>
+          <span style="font-size:12px;color:var(--t4)">Locked</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Your Certificates</div>
+        <div class="highlight-box" style="margin-bottom:8px">
+          <div style="font-weight:600;font-size:13px;color:var(--t1)">🏆 Python Basics</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">Earned Feb 2026</div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:8px">Download PDF</button>
+        </div>
+        <div class="info-box">
+          <div style="font-weight:600;font-size:13px;color:var(--t1)">🎯 Web Dev Fundamentals</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">Earned Jan 2026</div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:8px">Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: COMMUNITY ================= -->
+<div class="page" id="page-community">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Community Forum</div>
+      <div class="page-sub">Connect, ask, and share with your peers</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-primary btn-sm" onclick="openModal('post')">+ New Post</button>
+    </div>
+  </div>
+  <div class="grid-65-35">
+    <div class="card">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="tabs"><div class="tab active">All</div><div class="tab">Questions</div><div class="tab">Resources</div><div class="tab">Announcements</div></div>
+        <input class="form-input" placeholder="Search threads..." style="flex:1;min-width:150px">
+      </div>
+      <div class="thread-item active-thread">
+        <div class="ti-votes"><div class="ti-vnum">24</div><div class="ti-vlbl">votes</div></div>
+        <div class="ti-body">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="badge badge-orange">Question</span></div>
+          <div class="ti-title">How to handle class imbalance in ML models?</div>
+          <div class="ti-meta">
+            <div class="av av-sm av-orange">PK</div> Priya Krishnan · 2h ago · <span>💬 8 replies</span> · <span>👁 142 views</span>
+          </div>
+        </div>
+      </div>
+      <div class="thread-item">
+        <div class="ti-votes"><div class="ti-vnum">15</div><div class="ti-vlbl">votes</div></div>
+        <div class="ti-body">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="badge badge-blue">Resource</span></div>
+          <div class="ti-title">Curated list of free ML datasets for practice projects</div>
+          <div class="ti-meta">
+            <div class="av av-sm av-blue">RM</div> Rahul Mehta · 1d ago · <span>💬 3 replies</span> · <span>👁 289 views</span>
+          </div>
+        </div>
+      </div>
+      <div class="thread-item">
+        <div class="ti-votes"><div class="ti-vnum">7</div><div class="ti-vlbl">votes</div></div>
+        <div class="ti-body">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="badge badge-violet">Announcement</span></div>
+          <div class="ti-title">Batch 2024 final presentation schedule — all dates confirmed</div>
+          <div class="ti-meta">
+            <div class="av av-sm av-violet">KR</div> Dr. Kavitha R. · 2d ago · <span>💬 12 replies</span> · <span>👁 520 views</span>
+          </div>
+        </div>
+      </div>
+      <div class="thread-item">
+        <div class="ti-votes"><div class="ti-vnum">11</div><div class="ti-vlbl">votes</div></div>
+        <div class="ti-body">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="badge badge-orange">Question</span></div>
+          <div class="ti-title">Best way to structure a REST API for a multi-tenant SaaS app?</div>
+          <div class="ti-meta">
+            <div class="av av-sm av-green">SA</div> Sneha Agarwal · 3d ago · <span>💬 5 replies</span> · <span>👁 178 views</span>
+          </div>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div style="margin-bottom:8px;font-weight:600;font-size:14px;color:var(--t1)">💬 How to handle class imbalance in ML models?</div>
+      <div class="comment-item">
+        <div class="av av-sm av-blue">RM</div>
+        <div class="comment-body">
+          <div><span class="comment-author">Rahul Mehta</span><span class="comment-time">1h ago</span></div>
+          <div class="comment-text">Try SMOTE (Synthetic Minority Oversampling Technique) from imbalanced-learn. Also adjusting class weights in sklearn models using class_weight='balanced' is super effective and quick to implement.</div>
+        </div>
+      </div>
+      <div class="comment-item">
+        <div class="av av-sm av-violet">KR</div>
+        <div class="comment-body">
+          <div><span class="comment-author">Dr. Kavitha R.</span><span class="comment-time">45m ago</span></div>
+          <div class="comment-text">Both SMOTE and class weights are good. Also consider using precision-recall AUC instead of accuracy as your evaluation metric when dealing with imbalanced datasets. F1 score is also very informative here.</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <input class="form-input" placeholder="Write a reply..." style="flex:1">
+        <button class="btn btn-primary">Post</button>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Top Contributors</div>
+        <div class="item-row">
+          <div class="av av-blue">RM</div>
+          <div style="flex:1"><div style="font-weight:600;font-size:13px;color:var(--t1)">Rahul Mehta</div><div style="font-size:12px;color:var(--t3)">142 points · 28 answers</div></div>
+          <span class="badge badge-blue">Expert</span>
+        </div>
+        <div class="item-row">
+          <div class="av av-violet">KR</div>
+          <div style="flex:1"><div style="font-weight:600;font-size:13px;color:var(--t1)">Dr. Kavitha R.</div><div style="font-size:12px;color:var(--t3)">98 points · Faculty</div></div>
+          <span class="badge badge-violet">Mentor</span>
+        </div>
+        <div class="item-row">
+          <div class="av av-orange">PK</div>
+          <div style="flex:1"><div style="font-weight:600;font-size:13px;color:var(--t1)">Priya Krishnan</div><div style="font-size:12px;color:var(--t3)">67 points · 12 answers</div></div>
+          <span class="badge badge-orange">Active</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Popular Tags</div>
+        <div class="pill-tags">
+          <span class="tag" style="cursor:pointer">#python</span>
+          <span class="tag" style="cursor:pointer">#machine-learning</span>
+          <span class="tag" style="cursor:pointer">#react</span>
+          <span class="tag" style="cursor:pointer">#sql</span>
+          <span class="tag" style="cursor:pointer">#career</span>
+          <span class="tag" style="cursor:pointer">#internship-tips</span>
+          <span class="tag" style="cursor:pointer">#debugging</span>
+          <span class="tag" style="cursor:pointer">#data-viz</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: ANALYTICS ================= -->
+<div class="page" id="page-analytics">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Analytics Dashboard</div>
+      <div class="page-sub">Platform performance metrics · Last 30 days</div>
+    </div>
+    <div class="ph-right">
+      <select class="form-select" style="width:auto">
+        <option>Last 30 days</option><option>Last 90 days</option><option>This Year</option>
+      </select>
+      <button class="btn btn-primary btn-sm">Export CSV</button>
+    </div>
+  </div>
+  <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    <div class="stat-card"><div class="stat-num">2,847</div><div class="stat-lbl">Total Users</div><div class="stat-change up">↑ 12.4%</div></div>
+    <div class="stat-card"><div class="stat-num">68.3%</div><div class="stat-lbl">Completion Rate</div><div class="stat-change up">↑ 3.7%</div></div>
+    <div class="stat-card"><div class="stat-num">4.2</div><div class="stat-lbl">Avg Rating</div><div class="stat-change up">↑ 0.3</div></div>
+    <div class="stat-card"><div class="stat-num">1,924</div><div class="stat-lbl">Assignments Done</div><div class="stat-change up">↑ 8.1%</div></div>
+    <div class="stat-card"><div class="stat-num">127</div><div class="stat-lbl">Active Orgs</div><div class="stat-change up">↑ 5.1%</div></div>
+    <div class="stat-card"><div class="stat-num">384</div><div class="stat-lbl">Active Internships</div><div class="stat-change up">↑ 8.2%</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">Platform Growth — Monthly Signups</div>
+      <div class="chart-wrap">
+        <div class="bar-chart">
+          <div class="bar" style="height:30%"><span class="bar-label">Jul</span></div>
+          <div class="bar" style="height:45%"><span class="bar-label">Aug</span></div>
+          <div class="bar" style="height:55%"><span class="bar-label">Sep</span></div>
+          <div class="bar" style="height:50%"><span class="bar-label">Oct</span></div>
+          <div class="bar" style="height:70%"><span class="bar-label">Nov</span></div>
+          <div class="bar" style="height:65%"><span class="bar-label">Dec</span></div>
+          <div class="bar" style="height:80%"><span class="bar-label">Jan</span></div>
+          <div class="bar" style="height:75%"><span class="bar-label">Feb</span></div>
+          <div class="bar" style="height:100%;background:linear-gradient(180deg,var(--a),rgba(249,115,22,.5))"><span class="bar-label">Mar</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Traffic Sources</div>
+      <div class="donut-wrap">
+        <div class="donut">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--bg3)" stroke-width="12"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--a)" stroke-width="12" stroke-dasharray="120 119"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--blue)" stroke-width="12" stroke-dasharray="75 164" stroke-dashoffset="-120"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--violet)" stroke-width="12" stroke-dasharray="44 195" stroke-dashoffset="-195"/>
+          </svg>
+          <div class="donut-center"><div class="donut-val">100%</div><div class="donut-sub">Traffic</div></div>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-item"><div class="dl-dot" style="background:var(--a)"></div>Organic 50%</div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--blue)"></div>Referral 31%</div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--violet)"></div>Direct 19%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Top Performing Courses — Detailed Breakdown</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Course</th><th>Enrolled</th><th>Completion</th><th>Avg Rating</th><th>Certificates</th><th>Revenue</th></tr></thead>
+        <tbody>
+          <tr><td class="td-name">Python for Data Science</td><td>842</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:80px"><div class="progress-bar green" style="width:91%"></div></div>91%</div></td><td>4.8 ★</td><td>612</td><td style="color:var(--green)">₹2.1L</td></tr>
+          <tr><td class="td-name">Web Development Bootcamp</td><td>673</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:80px"><div class="progress-bar blue" style="width:87%"></div></div>87%</div></td><td>4.6 ★</td><td>489</td><td style="color:var(--green)">₹1.8L</td></tr>
+          <tr><td class="td-name">Machine Learning Fundamentals</td><td>521</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:80px"><div class="progress-bar" style="width:79%"></div></div>79%</div></td><td>4.5 ★</td><td>318</td><td style="color:var(--green)">₹1.4L</td></tr>
+          <tr><td class="td-name">UI/UX Design Principles</td><td>389</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:80px"><div class="progress-bar violet" style="width:74%"></div></div>74%</div></td><td>4.4 ★</td><td>201</td><td style="color:var(--green)">₹98k</td></tr>
+          <tr><td class="td-name">SQL & Database Design</td><td>298</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track" style="width:80px"><div class="progress-bar" style="width:68%"></div></div>68%</div></td><td>4.2 ★</td><td>142</td><td style="color:var(--green)">₹65k</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: USERS ================= -->
+<div class="page" id="page-users">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">User Management</div>
+      <div class="page-sub">2,847 registered users across all roles</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-ghost btn-sm">Export</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('invite')">+ Invite User</button>
+    </div>
+  </div>
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+    <div class="stat-card"><div class="stat-num" style="color:var(--a)">1,712</div><div class="stat-lbl">Interns</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">654</div><div class="stat-lbl">Faculty</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--violet)">285</div><div class="stat-lbl">Organizations</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">196</div><div class="stat-lbl">Admins</div></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <input class="form-input" placeholder="Search by name or email..." style="flex:1;min-width:200px">
+      <select class="form-select" style="width:auto"><option>All Roles</option><option>Intern</option><option>Faculty</option><option>Organization</option><option>Admin</option></select>
+      <select class="form-select" style="width:auto"><option>All Status</option><option>Active</option><option>Inactive</option><option>At Risk</option></select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Batch/Org</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-orange">PK</div><span class="td-name">Priya Krishnan</span></div></td><td style="color:var(--t3);font-size:12px">priya.k@example.com</td><td><span class="badge badge-orange">Intern</span></td><td style="color:var(--t3)">2024-A</td><td><span class="badge badge-green">Active</span></td><td style="font-size:12px;color:var(--t3)">Jan 2024</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-danger btn-sm">Remove</button></div></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-blue">RM</div><span class="td-name">Rahul Mehta</span></div></td><td style="color:var(--t3);font-size:12px">rahul.m@example.com</td><td><span class="badge badge-orange">Intern</span></td><td style="color:var(--t3)">2024-A</td><td><span class="badge badge-green">Active</span></td><td style="font-size:12px;color:var(--t3)">Jan 2024</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-danger btn-sm">Remove</button></div></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-violet">KR</div><span class="td-name">Dr. Kavitha R.</span></div></td><td style="color:var(--t3);font-size:12px">kavitha.r@edu.in</td><td><span class="badge badge-blue">Faculty</span></td><td style="color:var(--t3)">Data Science</td><td><span class="badge badge-green">Active</span></td><td style="font-size:12px;color:var(--t3)">Aug 2023</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-danger btn-sm">Remove</button></div></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-green">SA</div><span class="td-name">Sneha Agarwal</span></div></td><td style="color:var(--t3);font-size:12px">sneha.a@example.com</td><td><span class="badge badge-orange">Intern</span></td><td style="color:var(--t3)">2024-B</td><td><span class="badge badge-amber">At Risk</span></td><td style="font-size:12px;color:var(--t3)">Jul 2024</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-danger btn-sm">Remove</button></div></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-red">AK</div><span class="td-name">Arjun Kumar</span></div></td><td style="color:var(--t3);font-size:12px">arjun.k@techcorp.com</td><td><span class="badge badge-violet">Org</span></td><td style="color:var(--t3)">TechCorp</td><td><span class="badge badge-green">Active</span></td><td style="font-size:12px;color:var(--t3)">Mar 2023</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-danger btn-sm">Remove</button></div></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-amber">VN</div><span class="td-name">Vikram Nair</span></div></td><td style="color:var(--t3);font-size:12px">vikram.n@example.com</td><td><span class="badge badge-orange">Intern</span></td><td style="color:var(--t3)">2024-A</td><td><span class="badge badge-green">Active</span></td><td style="font-size:12px;color:var(--t3)">Jan 2024</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-danger btn-sm">Remove</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:12px;color:var(--t3)">Showing 6 of 2,847 users</span>
+      <div style="display:flex;gap:4px">
+        <button class="btn btn-ghost btn-sm">← Prev</button>
+        <button class="btn btn-primary btn-sm">1</button>
+        <button class="btn btn-ghost btn-sm">2</button>
+        <button class="btn btn-ghost btn-sm">3</button>
+        <button class="btn btn-ghost btn-sm">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE: SETTINGS ================= -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="page-title">Settings</div>
+      <div class="page-sub">Manage your account and preferences</div>
+    </div>
+    <div class="ph-right">
+      <button class="btn btn-primary">Save Changes</button>
+    </div>
+  </div>
+  <div class="grid-65-35">
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Profile Information</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+          <div class="av av-orange" style="width:60px;height:60px;font-size:20px">PK</div>
+          <div>
+            <button class="btn btn-ghost btn-sm">Upload Photo</button>
+            <div style="font-size:12px;color:var(--t4);margin-top:4px">JPG, PNG up to 2MB</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">First Name</label><input class="form-input" value="Priya"></div>
+          <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" value="Krishnan"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" value="priya.k@example.com"></div>
+        <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" value="+91 9876543210"></div>
+        <div class="form-group"><label class="form-label">Bio</label><textarea class="form-textarea">Data Science enthusiast, passionate about ML and AI applications. Currently interning at TechCorp Inc.</textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">College/University</label><input class="form-input" value="IIT Madras"></div>
+          <div class="form-group"><label class="form-label">Year of Study</label><select class="form-select"><option>3rd Year</option><option>4th Year</option><option>PG</option></select></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Security</div>
+        <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+          <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+        </div>
+        <button class="btn btn-secondary">Update Password</button>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Notifications</div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-name">Assignment Reminders</div><div class="setting-desc">Get notified before due dates</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-name">Diary Review Alerts</div><div class="setting-desc">When faculty reviews your entries</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-name">Community Replies</div><div class="setting-desc">When someone replies to your posts</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-name">New Internship Alerts</div><div class="setting-desc">Matching your skill profile</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-name">Weekly Progress Report</div><div class="setting-desc">Email summary every Sunday</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Appearance</div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-name">Theme</div></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary btn-sm" onclick="setTheme('dark')">Dark</button>
+            <button class="btn btn-secondary btn-sm" onclick="setTheme('light')">Light</button>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="setting-name" style="margin-bottom:8px">Accent Color</div>
+          <div style="display:flex;gap:8px">
+            <div onclick="setAccent('#f97316')" style="width:24px;height:24px;border-radius:50%;background:#f97316;cursor:pointer;border:2px solid var(--a);"></div>
+            <div onclick="setAccent('#3b82f6')" style="width:24px;height:24px;border-radius:50%;background:#3b82f6;cursor:pointer"></div>
+            <div onclick="setAccent('#a855f7')" style="width:24px;height:24px;border-radius:50%;background:#a855f7;cursor:pointer"></div>
+            <div onclick="setAccent('#22c55e')" style="width:24px;height:24px;border-radius:50%;background:#22c55e;cursor:pointer"></div>
+            <div onclick="setAccent('#ef4444')" style="width:24px;height:24px;border-radius:50%;background:#ef4444;cursor:pointer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Privacy</div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-name">Profile Visibility</div><div class="setting-desc">Show profile to organizations</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-name">Show Progress Publicly</div><div class="setting-desc">Allow peers to view your progress</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div><!-- end #content -->
+</div><!-- end #main -->
+
+<!-- MODAL -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div id="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// Navigation
+function nav(pageId, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('content').scrollTop = 0;
+}
+
+// Sidebar
+let sidebarCollapsed = false;
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  if (window.innerWidth < 700) {
+    sb.classList.toggle('mobile-open');
+    document.getElementById('mobile-overlay').classList.toggle('show');
+  } else {
+    sidebarCollapsed = !sidebarCollapsed;
+    sb.classList.toggle('collapsed', sidebarCollapsed);
+  }
+}
+function closeMobile() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('mobile-overlay').classList.remove('show');
+}
+
+// Theme
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('theme-lbl').textContent = t === 'dark' ? 'Light' : 'Dark';
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+}
+
+// Accent color
+function setAccent(color) {
+  document.documentElement.style.setProperty('--a', color);
+}
+
+// Tabs
+function switchTab(el, tabId) {
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Modal
+const modals = {
+  submit: {
+    title: 'Submit Assignment',
+    body: `<div class="form-group"><label class="form-label">Assignment</label><input class="form-input" value="Assignment 4 — API Design" readonly></div>
+           <div class="form-group"><label class="form-label">Upload File</label><input class="form-input" type="file" accept=".pdf,.zip,.py"></div>
+           <div class="form-group"><label class="form-label">Notes for Reviewer</label><textarea class="form-textarea" placeholder="Add any notes..."></textarea></div>
+           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+             <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+             <button class="btn btn-primary" onclick="closeModal()">Submit Assignment</button>
+           </div>`
+  },
+  apply: {
+    title: 'Apply for Internship',
+    body: `<div class="highlight-box" style="margin-bottom:16px"><div style="font-weight:700;color:var(--t1)">ML Engineer Intern — TechCorp Inc.</div><div style="font-size:12px;color:var(--t3);margin-top:2px">Bangalore · ₹25,000/mo · 6 months</div></div>
+           <div class="form-group"><label class="form-label">Cover Letter</label><textarea class="form-textarea" rows="5" placeholder="Why are you the perfect fit for this role?"></textarea></div>
+           <div class="form-group"><label class="form-label">Resume / CV</label><input class="form-input" type="file" accept=".pdf"></div>
+           <div class="form-group"><label class="form-label">LinkedIn Profile</label><input class="form-input" placeholder="https://linkedin.com/in/..."></div>
+           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+             <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+             <button class="btn btn-primary" onclick="closeModal()">Submit Application</button>
+           </div>`
+  },
+  diary: {
+    title: 'New Diary Entry',
+    body: `<div class="form-group"><label class="form-label">Entry Title</label><input class="form-input" placeholder="What did you work on today?"></div>
+           <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" value="2026-03-18"></div>
+           <div class="form-group"><label class="form-label">What I learned</label><textarea class="form-textarea" rows="3" placeholder="Skills, concepts, tools..."></textarea></div>
+           <div class="form-group"><label class="form-label">Tasks completed</label><textarea class="form-textarea" rows="3" placeholder="List what you accomplished..."></textarea></div>
+           <div class="form-group"><label class="form-label">Challenges faced</label><textarea class="form-textarea" rows="2" placeholder="Any blockers or difficulties?"></textarea></div>
+           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+             <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+             <button class="btn btn-primary" onclick="closeModal()">Save Entry</button>
+           </div>`
+  },
+  invite: {
+    title: 'Invite New User',
+    body: `<div class="form-row"><div class="form-group"><label class="form-label">First Name</label><input class="form-input" placeholder="First name"></div><div class="form-group"><label class="form-label">Last Name</label><input class="form-input" placeholder="Last name"></div></div>
+           <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="user@example.com"></div>
+           <div class="form-group"><label class="form-label">Role</label><select class="form-select"><option>Intern</option><option>Faculty</option><option>Organization</option><option>Admin</option></select></div>
+           <div class="form-group"><label class="form-label">Batch / Department (optional)</label><input class="form-input" placeholder="e.g. 2024-A or Data Science"></div>
+           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+             <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+             <button class="btn btn-primary" onclick="closeModal()">Send Invitation</button>
+           </div>`
+  },
+  post: {
+    title: 'New Forum Post',
+    body: `<div class="form-group"><label class="form-label">Post Type</label><select class="form-select"><option>Question</option><option>Resource</option><option>Announcement</option><option>Discussion</option></select></div>
+           <div class="form-group"><label class="form-label">Title</label><input class="form-input" placeholder="What's your question or topic?"></div>
+           <div class="form-group"><label class="form-label">Body</label><textarea class="form-textarea" rows="5" placeholder="Provide more details, context, or your resource description..."></textarea></div>
+           <div class="form-group"><label class="form-label">Tags</label><input class="form-input" placeholder="#python, #ml, #career ..."></div>
+           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+             <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+             <button class="btn btn-primary" onclick="closeModal()">Publish Post</button>
+           </div>`
+  },
+  'post-internship': {
+    title: 'Post New Internship',
+    body: `<div class="form-group"><label class="form-label">Role Title</label><input class="form-input" placeholder="e.g. Frontend Developer Intern"></div>
+           <div class="form-row"><div class="form-group"><label class="form-label">Location</label><input class="form-input" placeholder="City or Remote"></div><div class="form-group"><label class="form-label">Stipend (₹/month)</label><input class="form-input" type="number" placeholder="20000"></div></div>
+           <div class="form-row"><div class="form-group"><label class="form-label">Duration</label><select class="form-select"><option>1-3 months</option><option>3-6 months</option><option>6+ months</option></select></div><div class="form-group"><label class="form-label">Open Slots</label><input class="form-input" type="number" placeholder="3"></div></div>
+           <div class="form-group"><label class="form-label">Required Skills</label><input class="form-input" placeholder="React, Python, SQL..."></div>
+           <div class="form-group"><label class="form-label">Job Description</label><textarea class="form-textarea" rows="4" placeholder="Describe the role, responsibilities, and requirements..."></textarea></div>
+           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+             <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+             <button class="btn btn-primary" onclick="closeModal()">Post Internship</button>
+           </div>`
+  }
+};
+
+function openModal(type) {
+  const m = modals[type];
+  if (!m) return;
+  document.getElementById('modal-title').textContent = m.title;
+  document.getElementById('modal-body').innerHTML = m.body;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+</script>
+</body>
+</html>
